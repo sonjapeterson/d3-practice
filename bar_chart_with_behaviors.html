@@ -29,7 +29,9 @@
             var barPadding = 3;
             var dataset = [];
             var maxValue = 100;
-            var minValue = 5; 
+            var minValue = 5;
+            var sortOrder = false;
+
             for (i = 0; i < 20; i++) {
                 dataset[i] = Math.floor(Math.random() * (maxValue - minValue) + minValue);
             };
@@ -101,20 +103,35 @@
                 });
 
                 var sortBars = function() {
+                    sortOrder = !sortOrder;
                     svg.selectAll("rect")
                         .sort(function(a, b) {
-                            return d3.ascending(a, b);
+                            if (sortOrder) {
+                                return d3.ascending(a, b);
+                            } else {
+                                return d3.descending(a, b);
+                            }
                         })
                         .transition()
+                        .delay(function(d, i) {
+                            return i * 50;
+                        })
                         .duration(1000)
                         .attr("x", function(d, i) {
                             return xScale(i);
                         });
                     svg.selectAll("text")
                         .sort(function(a, b) {
-                            return d3.ascending(a, b);
+                            if (sortOrder) {
+                                return d3.ascending(a, b);
+                            } else {
+                                return d3.descending(a, b);
+                            }
                         })
                         .transition()
+                        .delay(function(d, i) {
+                            return i * 50;
+                        })
                         .duration(1000)
                         .attr({
                             x: function(d, i) { return xScale(i) + xScale.rangeBand() / 2; },
