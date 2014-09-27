@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>D3 Page Template</title>
+        <script type="text/javascript" src="d3/d3.js"></script>
+        <style>
+        rect {
+            vertical-align: bottom;
+        }
+        </style>
+    </head>
+    <body>
+        <p id="update">Click to update all values</p>
+        <p id ="add">Click to add a value</p>
+        <p id ="delete">Click to delete a value</p>
+        <script type="text/javascript">
+            var w = 650;
+            var h = 250;
+            var barPadding = 3;
+            var dataset = [];
+            var maxValue = 100;
+            var minValue = 5; 
+            var key = function(d) {
+                return d.key;
+            }
+            for (i = 0; i < 20; i++) {
+                dataset[i] = { key: i, value: Math.floor(Math.random() * (maxValue - minValue) + minValue)};
+            };
+            var xScale = d3.scale.ordinal()
+                .domain(d3.range(dataset.length))
+                .rangeRoundBands([0, w], 0.05);
+            var yScale = d3.scale.linear()
+                .domain([0, d3.max(dataset, function(d) { return d.value; })])
+                .range([0, h]);
+            var svg = d3.select("body").append("svg")
+                .attr("width", w)
+                .attr("height", h);
+            svg.selectAll("rect")
+                .data(dataset, key)
+                .enter()
+                .append("rect")
+                .attr({
+                    x: function(d, i) { return xScale(i); },
+                    y: function(d) { return h - yScale(d.value); },
+                    width:  xScale.rangeBand(),
+                    height: function(d) { return yScale(d.value); },
+                    fill: function(d) { return "rgb(0, 0, " + (d.value * 10) + ")"; }
+                });
+            svg.selectAll("text")
+                .data(dataset, key)
+                .enter()
+                .append("text")
+                .text(function(d) { return d.value; })
+                .attr({
+                    x: function(d, i) { return xScale(i) + xScale.rangeBand() / 2; },
+                    y: function(d) { return h - yScale(d.value) + 14 },
+                    "text-anchor": "middle"
+                })
+                .style({
+                    "font-family": "sans-serif",
+                    "font-size": "11px",
+                    "fill": "white"
+                })
+
+            d3.select("#update")
+                .on("click", function() {
+                    for (i = 0; i < dataset.length ; i++) {
+                        var newNumber = Math.floor(Math.random() * (maxValue - minValue) + minValue);
+                        dataset[i].value = newNumber;
+                    };
+
+                    xScale.domain(d3.range(dataset.length));
+                    yScale.domain([0, d3.max(dataset, function(d) { return d.value; })]);
+
+                    svg.selectAll("rect")
+                        .data(dataset, key)
+                        .transition()
+                        .delay(function(d, i) { return i / dataset.length * 1000 })
+                        .attr({
+                            y: function(d) { return h - yScale(d.value); },
+                            height: function(d) { return yScale(d.value); },
+                            fill: function(d) { return "rgb(0, 0, " + (d.value * (maxValue / 10)) + ")"; }
+                        });
+
+                    svg.selectAll("text")
+                        .data(dataset, key)
+                        .transition()
+                        .delay(function(d, i) { return i / dataset.length * 1000 })
+                        .text(function(d) { return d.value; })
+                        .attr({
+                            x: function(d, i) { return xScale(i) + xScale.rangeBand() / 2; },
+                            y: function(d) { return h - yScale(d.value) + 20; },
+                            "text-anchor": "middle"
+                        });
+                });
+
+//Adding a value
+            d3.select("#add")
+                .on("click", function(){
+                    var newNumber = Math.floor(Math.random() * maxValue);
+                    var newKey = dataset[dataset.length - 1].key + 1;
+                    dataset.push({key: newKey, value: newNumber});
+
+                    xScale.domain(d3.range(dataset.length));
+                    yScale.domain([0, d3.max(dataset, function(d) { return d.value; })]);
+
+                    var bars = svg.selectAll("rect")
+                        .data(dataset, key);
+                    bars.enter()
+                        .append("rect")
+                        .attr({
+                            x: w,
+                            y: function(d) { return h - yScale(d.value); },
+                            width: xScale.rangeBand(),
+                            height: function(d) { return yScale(d.value) },
+                            fill: function(d) { return "rgb(0, 0, " + (d.value * (maxValue / 10)) + ")"; }
+                        });
+
+                    bars.transition()
+                        .duration(1000)
+                        .attr({
+                            x: function(d, i) { return xScale(i) },
+                            y: function(d) { return h - yScale(d.value) },
+                            "width": xScale.rangeBand(),
+                            "height": function(d) { return yScale(d.value) }
+                        });
+
+                    var labels = svg.selectAll("text")
+                        .data(dataset, key);
+                    labels.enter()
+                        .append("text")
+                        .text(function(d) { return d.value; })
+                        .attr({
+                            x: function(d, i) { return xScale(i) + xScale.rangeBand() / 2; },
+                            y: function(d) { return h - yScale(d.value) + 20 }
+                        })
+                        .style({
+                            "font-family": "sans-serif",
+                            "font-size": "11px",
+                            "fill": "white"
+                        });
+
+                    labels.transition()
+                        .duration(1000)
+                        .attr({
+                            x: function(d, i) { return xScale(i) + xScale.rangeBand() / 2; },
+                            y: function(d) { return h - yScale(d.value) + 20 },
+                            "text-anchor": "middle"
+                        });
+                });
+
+// Deleting a value
+            d3.select("#delete")
+                .on("click", function() {
+                    dataset.shift();
+
+                    xScale.domain(d3.range(dataset.length));
+                    yScale.domain([0, d3.max(dataset, function(d) { return d.value; })]);
+
+                    var bars = svg.selectAll("rect")
+                        .data(dataset, key);
+
+                    bars.enter()
+                        .append("rect")
+                        .attr({
+                            x: function(d, i) { return xScale(i); },
+                            y: function(d) { return h - yScale(d.value); },
+                            width: xScale.rangeBand(),
+                            height: function(d) { return yScale(d.value) },
+                            fill: function(d) { return "rgb(0, 0, " + (d.value * 10) + ")"; }
+                        });
+
+                    bars.transition()
+                        .duration(500)
+                        .attr({
+                            x: function(d, i) { return xScale(i) },
+                            y: function(d) { return h - yScale(d.value); },
+                            width: xScale.rangeBand(),
+                            height: function(d) { return yScale(d.value) },
+                            fill: function(d) { return "rgb(0, 0, " + (d.value * 10) + ")"; }
+                        });
+
+                    bars.exit()
+                        .transition()
+                        .duration(500)
+                        .attr("x", 0)
+                        .remove();
+
+                    var labels = svg.selectAll("text")
+                        .data(dataset, key);
+
+                    labels.enter()
+                        .append("text")
+                        .text(function(d) { return d.value; })
+                        .attr({
+                            x: function(d, i) { return xScale(i) + xScale.rangeBand() / 2; },
+                            y: function(d) { return h - yScale(d.value) + 20 }
+                        })
+                        .style({
+                            "font-family": "sans-serif",
+                            "font-size": "11px",
+                            "fill": "white"
+                        });
+
+                    labels.transition()
+                        .duration(500)
+                        .attr({
+                            x: function(d, i) { return xScale(i) + xScale.rangeBand() / 2; },
+                            y: function(d) { return h - yScale(d.value) + 20 },
+                            "text-anchor": "middle"
+                        });
+
+                    labels.exit()
+                        .transition()
+                        .duration(500)
+                        .attr("x", 0)
+                        .remove();
+                })
+        </script>
+    </body>
+</html>
