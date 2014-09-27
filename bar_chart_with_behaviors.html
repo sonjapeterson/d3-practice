@@ -14,7 +14,7 @@
         }
 
         rect:hover {
-            fill: orange;
+            fill: #FBCD36;
         }
         svg text {
             pointer-events: none;
@@ -51,28 +51,47 @@
                 .on("click", function(d) {
                     sortBars();
                 })
+                .on("mouseover", function(d) {
+                    var xPosition = parseFloat(d3.select(this).attr("x")) + xScale.rangeBand() / 2;
+                    var yPosition = parseFloat(d3.select(this).attr("y")) + 14;
+                    svg.append("text")
+                        .attr({
+                            "id": "tooltip",
+                            "x": xPosition,
+                            "y": yPosition,
+                            "text-anchor": "middle",
+                            "font-family": "sans-serif",
+                            "font-size": "11px",
+                            "font-weight": "bold",
+                            "fill": "black"
+                        })
+                        .text(d);
+                })
+                .on("mouseout", function(d) {
+                    d3.select("#tooltip").remove();
+                })
                 .attr({
                     x: function(d, i) { return xScale(i); },
                     y: function(d) { return h - yScale(d); },
                     width:  xScale.rangeBand(),
                     height: function(d) { return yScale(d); },
                     fill: function(d) { return "rgb(0, 0, " + (d * 10) + ")"; }
-                });
-            svg.selectAll("text")
-                .data(dataset)
-                .enter()
-                .append("text")
-                .text(function(d) { return d; })
-                .attr({
-                    x: function(d, i) { return xScale(i) + xScale.rangeBand() / 2; },
-                    y: function(d) { return h - yScale(d) + 14 },
-                    "text-anchor": "middle"
                 })
-                .style({
-                    "font-family": "sans-serif",
-                    "font-size": "11px",
-                    "fill": "white"
-                })
+            // svg.selectAll("text")
+            //     .data(dataset)
+            //     .enter()
+            //     .append("text")
+            //     .text(function(d) { return d; })
+            //     .attr({
+            //         x: function(d, i) { return xScale(i) + xScale.rangeBand() / 2; },
+            //         y: function(d) { return h - yScale(d) + 14 },
+            //         "text-anchor": "middle"
+            //     })
+            //     .style({
+            //         "font-family": "sans-serif",
+            //         "font-size": "11px",
+            //         "fill": "white"
+            //     })
             d3.select("p")
                 .on("click", function() {
                     var dataset = [];
@@ -90,16 +109,16 @@
                             height: function(d) { return yScale(d); },
                             fill: function(d) { return "rgb(0, 0, " + (d * (maxValue / 10)) + ")"; }
                         });
-                    svg.selectAll("text")
-                        .data(dataset)
-                        .transition()
-                        .duration(1000)
-                        .delay(function(d, i) { return i / dataset.length * 1000 })
-                        .text(function(d) { return d; })
-                        .attr({
-                            x: function(d, i) { return xScale(i) + xScale.rangeBand() / 2; },
-                            y: function(d) { return h - yScale(d) + 20 }
-                        });
+                    // svg.selectAll("text")
+                    //     .data(dataset)
+                    //     .transition()
+                    //     .duration(1000)
+                    //     .delay(function(d, i) { return i / dataset.length * 1000 })
+                    //     .text(function(d) { return d; })
+                    //     .attr({
+                    //         x: function(d, i) { return xScale(i) + xScale.rangeBand() / 2; },
+                    //         y: function(d) { return h - yScale(d) + 20 }
+                    //     });
                 });
 
                 var sortBars = function() {
@@ -119,24 +138,24 @@
                         .duration(1000)
                         .attr("x", function(d, i) {
                             return xScale(i);
-                        });
-                    svg.selectAll("text")
-                        .sort(function(a, b) {
-                            if (sortOrder) {
-                                return d3.ascending(a, b);
-                            } else {
-                                return d3.descending(a, b);
-                            }
-                        })
-                        .transition()
-                        .delay(function(d, i) {
-                            return i * 50;
-                        })
-                        .duration(1000)
-                        .attr({
-                            x: function(d, i) { return xScale(i) + xScale.rangeBand() / 2; },
-                            y: function(d) { return h - yScale(d) + 20 }
-                        });
+                         });
+                    // svg.selectAll("text")
+                    //     .sort(function(a, b) {
+                    //         if (sortOrder) {
+                    //             return d3.ascending(a, b);
+                    //         } else {
+                    //             return d3.descending(a, b);
+                    //         }
+                    //     })
+                    //     .transition()
+                    //     .delay(function(d, i) {
+                    //         return i * 50;
+                    //     })
+                    //     .duration(1000)
+                    //     .attr({
+                    //         x: function(d, i) { return xScale(i) + xScale.rangeBand() / 2; },
+                    //         y: function(d) { return h - yScale(d) + 20 }
+                    //     });
                 }
         </script>
     </body>
