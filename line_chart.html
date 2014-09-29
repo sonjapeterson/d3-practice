@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>D3 Page Template</title>
+        <script type="text/javascript" src="d3/d3.js"></script>
+        <style>
+            path, line {
+                fill: none;
+                stroke: red;
+                stroke-width: 2px;
+            }
+           .axis {
+                fill: none;
+                stroke: black;
+                stroke-width: 2px;
+                shape-rendering: crispEdges;
+            }
+
+            text {
+                font-family: Arial;
+                font-size: 9pt;
+            }
+        </style>
+    </head>
+    <body>
+        <script type="text/javascript">
+            var dataset = [];
+            for (i = 0; i < 20; i++ ) {
+                dataset[i] = Math.floor(Math.random() * (50 - 1) + 1);
+            };
+            var w = 600;
+            var h = 400;
+            var margin = 20;
+            var yScale = d3.scale.linear().domain([0, d3.max(dataset)]).range([0 + margin, h - margin]);
+            var xScale = d3.scale.linear().domain([0, dataset.length]).range([0 + margin, w - margin]);
+
+            var svg = d3.select("body")
+                .append("svg")
+                .attr("width", w)
+                .attr("height", h);
+
+            var g = svg.append("g")
+                .attr("transform", "translate(0," + h + ")");
+
+            var line = d3.svg.line()
+                .x(function(d, i) { return xScale(i); })
+                .y(function(d) { return -1 * yScale(d); });
+
+            g.append("path")
+                .attr({
+                    "d": line(dataset),
+            });
+
+            g.append("line")
+                .attr({
+                    "x1": xScale(0),
+                    "y1": -1 * yScale(0),
+                    "x2": xScale(w),
+                    "y2": -1 * yScale(0),
+                    "class": "axis"
+                });
+
+            g.append("line")
+                .attr({
+                    "x1": xScale(0),
+                    "y1": -1 * yScale(0),
+                    "x2": xScale(0),
+                    "y2": -1 * yScale(d3.max(dataset)),
+                    "class": "axis"
+                });
+
+            g.selectAll(".xLabel")
+                .data(xScale.ticks(5))
+                .enter()
+                .append("text")
+                .attr({
+                    "class": "xLabel",
+                    "x": function(d) { return xScale(d) },
+                    "y": 0,
+                    "text-anchor": "middle"
+                })
+                .text(String)
+
+            g.selectAll(".yLabel")
+                .data(yScale.ticks(5))
+                .enter()
+                .append("text")
+                .attr({
+                    "class": "yLabel",
+                    "x": 0,
+                    "y": function(d) { return -1 * yScale(d) },
+                    "text-anchor": "right",
+                    "dy": 4
+                })
+                .text(String);
+        </script>
+    </body>
+</html>
