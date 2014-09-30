@@ -10,6 +10,14 @@
                 stroke: red;
                 stroke-width: 2px;
             }
+
+            line.mouseline {
+                fill: none;
+                stroke: white;
+                stroke-width: 2px;
+                stroke-width: 20px;
+                stroke-opacity: 0;
+            }
            .axis {
                 fill: none;
                 stroke: black;
@@ -21,9 +29,45 @@
                 font-family: Arial;
                 font-size: 9pt;
             }
+
+            circle {
+                fill: black;
+            }
+
+            circle:hover {
+                fill: red;
+            }
+
+            #tooltip {
+                position: absolute;
+                width: 50px;
+                height: auto;
+                padding: 5px;
+                background-color: white;
+                border-radius: 5px;
+                -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2);
+                -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2);
+                box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2);
+                pointer-events: none;
+            }
+
+            #tooltip.hidden {
+                display: none;
+            }
+
+            #tooltip p {
+                margin: 0;
+                font-family: Helvetica;
+                font-size: 12px;
+                line-height: 14px;
+            }
         </style>
     </head>
     <body>
+        <div id="tooltip" class="hidden">
+            <p class="tt-label">Height:</p>
+            <p class="tt-value">Value</p>
+        </div>
         <script type="text/javascript">
             var dataset = [];
             for (i = 0; i < 20; i++ ) {
@@ -51,6 +95,43 @@
                 .attr({
                     "d": line(dataset),
             });
+            g.selectAll("circle")
+                .data(dataset)
+                .enter()
+                .append("circle")
+                .attr({
+                    cx: function(d, i) { return xScale(i); },
+                    cy: function(d) { return -1 * yScale(d); },
+                    r: 4,
+                    "class": "datapoint"
+                })
+
+            g.selectAll(".mouseline")
+                .data(dataset)
+                .enter()
+                .append("line")
+                .attr({
+                    "x1": function(d, i) { return xScale(i); },
+                    "y1": -1 * yScale(0),
+                    "x2": function(d, i) { return xScale(i); },
+                    "y2": -1 * yScale(d3.max(dataset)),
+                    "class": "mouseline"
+                })
+                .on("mouseover", function(d, i){
+                    var xPosition = parseFloat(d3.select(this).attr("x1"));
+                    var yPosition = parseFloat(h - yScale(d));
+                    d3.select("#tooltip")
+                    .style({
+                            "left": xPosition + "px",
+                            "top": yPosition + "px",
+                    })
+                    .classed("hidden", false)
+                    .select(".tt-value")
+                    .text(d);
+                })
+                .on("mouseout", function(d){
+                     d3.select("#tooltip").classed("hidden", true);
+                 });
 
             g.append("line")
                 .attr({
@@ -69,7 +150,6 @@
                     "y2": -1 * yScale(d3.max(dataset)),
                     "class": "axis"
                 });
-
             g.selectAll(".xLabel")
                 .data(xScale.ticks(5))
                 .enter()
